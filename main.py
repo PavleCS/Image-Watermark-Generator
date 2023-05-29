@@ -1,7 +1,9 @@
 from tkinter import *
 from tkinter.messagebox import showinfo
 from tkinter import filedialog as fd
+from PIL import Image, ImageDraw, ImageFont
 
+image_path = ""
 
 window = Tk()
 window.title("Watermark Generator")
@@ -19,7 +21,7 @@ text_area.grid(row=0, column=0)
 text_area.insert(END, "Please upload your image")
 
 
-# ----- Custom Text Watermark -----
+# ----- Custom Watermark Text -----
 def click(self):
     custom_text_entry.delete(0, END)
 
@@ -38,6 +40,7 @@ custom_text_entry.grid(row=1, column=0, pady=10)
 
 # ----- Upload Action -----
 def upload():
+    global image_path
     filetypes = (
         ("PNG files", "*.png"),
         ("JPEG files", "*.jpg"),
@@ -57,6 +60,8 @@ def upload():
     text_area.delete(1.0, END)
     text_area.insert(1.0, "Your image is successfully uploaded. Please enter your text bellow and\npress generate to "
                           "add the watermark.")
+
+    image_path = path
 
 
 frame = Frame(
@@ -83,7 +88,31 @@ upload_button.grid(row=0, column=1, padx=10, pady=10)
 
 def generate():
     watermark = custom_text_entry.get()
-    print(watermark)
+
+    text_area.delete(1.0, END)
+    text_area.insert(1.0, "Your watermark is successfully added\nYou can upload your next image.")
+
+    # ----- Creating Watermark -----
+
+    image = Image.open(image_path)
+    width, height = image.size
+
+    draw = ImageDraw.Draw(image)
+    text = watermark
+
+    font = ImageFont.truetype("arial", 46)
+    text_width, text_height = draw.textsize(text, font)
+
+    # calculate the x,y coordinates of the text
+    margin = 100
+    x = width - text_width - margin
+    y = height - text_height - margin
+
+    # draw watermark in the bottom right corner
+    draw.text((x, y), text, font=font, fill='blue')
+    image.show()
+
+    image.save("watermark.png")
 
 
 generate_button = Button(
@@ -99,19 +128,17 @@ generate_button = Button(
 )
 generate_button.grid(row=1, column=1, pady=5)
 
-download_button = Button(
-    frame,
-    text="Download",
-    font=("arial", 15, "bold"),
-    highlightthickness=0,
-    border=0,
-    bg="#99627A",
-    fg="#E7CBCB",
-    width=12,
-)
-download_button.grid(row=2, column=1, padx=10, pady=10)
-
-
+# download_button = Button(
+#     frame,
+#     text="Download",
+#     font=("arial", 15, "bold"),
+#     highlightthickness=0,
+#     border=0,
+#     bg="#99627A",
+#     fg="#E7CBCB",
+#     width=12,
+# )
+# download_button.grid(row=2, column=1, padx=10, pady=10)
 
 
 window.mainloop()
